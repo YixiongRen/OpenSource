@@ -89,6 +89,7 @@ package
 		private var _signatureBitmap:Bitmap;
 		
 		//light objects
+		
 		private var _light:DirectionalLight;
 		private var _lightPicker:StaticLightPicker;
 		private var _direction:Vector3D;
@@ -107,6 +108,8 @@ package
 		private var _lastMouseX:Number;
 		private var _lastMouseY:Number;
 		
+		private var container:ObjectContainer3D;
+		
 		/**
 		 * Constructor
 		 */
@@ -124,11 +127,12 @@ package
 			_view.camera.lens.far = 2100;
 			
 			//setup controller to be used on the camera
-			_cameraController = new HoverController(_view.camera, null, 45, 20, 1000, 10);
+			//_cameraController = new HoverController(_view.camera, null, 45, 20, 1000, 10);
 			
 			//setup the lights for the scene
-			_light = new DirectionalLight(-1, -1, 1);
-			_direction = new Vector3D(-1, -1, 1);
+			
+			_light = new DirectionalLight(0, 0, 1);
+			_direction = new Vector3D(0, 0, 1);
 			_lightPicker = new StaticLightPicker([_light]);
 			_view.scene.addChild(_light);
 			
@@ -140,12 +144,13 @@ package
 			assetLoaderContext.mapUrlToData("texture.jpg", new AntTexture());
 			
 			//setup materials
+			/*
 			_groundMaterial = new TextureMaterial(Cast.bitmapTexture(SandTexture));
 			_groundMaterial.shadowMethod = new FilteredShadowMapMethod(_light);
 			_groundMaterial.lightPicker = _lightPicker;
 			_groundMaterial.specular = 0;
 			_ground = new Mesh(new PlaneGeometry(1000, 1000), _groundMaterial);
-			//_view.scene.addChild(_ground);
+			_view.scene.addChild(_ground);*/
 			
 			//setup the scene
 			_loader = new Loader3D();
@@ -158,7 +163,11 @@ package
 			_loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			//_loader.loadData(new AntModel(), assetLoaderContext);
 			_loader.loadData(new AntModel(), null);
-			_view.scene.addChild(_loader);
+			
+			container = new ObjectContainer3D();
+			container.addChild(_loader);
+			_view.scene.addChild(container);
+			//_view.scene.addChild(_loader);
 			
 			
 			//add signature
@@ -187,17 +196,20 @@ package
 		 
 		private function onEnterFrame(event:Event):void
 		{
-			if (_move) {
+			/*if (_move) {
 				_cameraController.panAngle = 0.3*(stage.mouseX - _lastMouseX) + _lastPanAngle;
 				_cameraController.tiltAngle = 0.3*(stage.mouseY - _lastMouseY) + _lastTiltAngle;
-			}
+			}*/
 			
-			_direction.x = -Math.sin(getTimer()/4000);
-			_direction.z = -Math.cos(getTimer()/4000);
-			_light.direction = _direction;
+			//_direction.x = -Math.sin(getTimer()/4000);
+			//_direction.z = -Math.cos(getTimer()/4000);
+			_direction.x = 0;
+			_direction.z = 1;
+			_light.direction = _direction;			/*light direction*/
 			
-			modelRotation += 10;
-			_loader.rotationY = modelRotation;
+			modelRotation += 5;
+			//_loader.rotationY = modelRotation;
+			container.rotationY = modelRotation;
 			
 			_view.render();
 		}
@@ -209,13 +221,14 @@ package
 		{
 			if (event.asset.assetType == AssetType.MESH) {
 				var mesh:Mesh = event.asset as Mesh;
-				mesh.castsShadows = true;
-				var material:ColorMaterial = new ColorMaterial(0xffffff, 1);
+				//mesh.castsShadows = true;
+				mesh.castsShadows = false;
+				var material:ColorMaterial = new ColorMaterial(0xff0000, 1);
 				material.lightPicker = _lightPicker;
 				material.shadowMethod = new FilteredShadowMapMethod(_light);
-				material.gloss = 30;
-				material.specular = 1;
-				material.ambientColor = 0x303040;
+				material.gloss = 100;
+				material.specular = 0.3;
+				material.ambientColor = 0x0000ff;
 				material.ambient = 1;
 				mesh.material = material;
 			} else if (event.asset.assetType == AssetType.MATERIAL) {
@@ -236,8 +249,8 @@ package
 		 */
 		private function onMouseDown(event:MouseEvent):void
 		{
-			_lastPanAngle = _cameraController.panAngle;
-			_lastTiltAngle = _cameraController.tiltAngle;
+			/*_lastPanAngle = _cameraController.panAngle;
+			_lastTiltAngle = _cameraController.tiltAngle;*/
 			_lastMouseX = stage.mouseX;
 			_lastMouseY = stage.mouseY;
 			_move = true;
